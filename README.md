@@ -7,12 +7,9 @@ This package reads N-Quads, Turtle and RDF/XML files and loads them into **RDD**
 
 ### SANSA RDF Spark
 The main application class is `net.sansa_stack.rdf.spark.App`.
-The application requires as application arguments:
+The application requires as application argument:
 
-1. path to the input folder containing the data as nt (e.g. `/data/input`)
-2. path to the output folder to write the resulting to (e.g. `/data/output`)
-
-All Spark workers should have access to the `/data/input` and `/data/output` directories.
+- path to the input folder containing the data as *.nq*, *.rdf* or *.ttl* (e.g. `data/stw.rdf`)
 
 ## Running the application on a Spark
 
