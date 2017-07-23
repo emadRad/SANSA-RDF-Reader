@@ -127,17 +127,19 @@ object App {
     * */
   def RdfXmlExamples(sparkSession : SparkSession, inputFile : String )= {
 
-    val rddSparkXML = getSparkXMLRDD(sparkSession, inputFile, "rdf:Description")
-    rddSparkXML.persist(StorageLevel.MEMORY_AND_DISK)
 
-    println("count=", rddSparkXML.count())
+    // Reading RDD using second method (our implementation)
+    val rdd = loadRDDFromXML(sparkSession, inputFile, "rdf:Description", 4)
+    println("count=", rdd.count())
+
+    println("count=", rdd.count())
 
 
 
     //----------......GraphX..... -----------
     //An example of page rank algorithm with the distributed graph of GraphX
 
-    val loadedGraph = LoadGraph.makeGraph(rddSparkXML)
+    val loadedGraph = LoadGraph(rdd)
     val graph = loadedGraph.graph
     val vertices = graph.vertices
     val rank = graph.pageRank(0.00001).vertices

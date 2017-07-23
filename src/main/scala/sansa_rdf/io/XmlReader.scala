@@ -28,10 +28,6 @@ object XmlReader {
 
     val inputFile = args(0)
 
-    // Reading an RDD using Spark-XML  first method
-    val rddSparkXML = getSparkXMLRDD(sparkSession, inputFile, "rdf:Description")
-    println("count=", rddSparkXML.count())
-
     // Reading RDD using second method (our implementation)
     val rdd = loadRDDFromXML(sparkSession, inputFile, "rdf:Description", 4)
     println("count=", rdd.count())
@@ -124,31 +120,6 @@ object XmlReader {
 
   /**
     * Loads an RDF/XML file into a List
-    *
-    * @param fileName An RDD of
-    * @return A listBuffer of blocks in the file
-    */
-  def readFileToBlocks(fileName: String, prefix : String, tag: String): ListBuffer[String] ={
-    var temp : String = ""
-    var blocks = new ListBuffer[String]()
-    var i = 0
-    for (line <- Source.fromFile(fileName).getLines) {
-      temp ++= line
-      i += 1
-      if(i >= 30 && line.trim() == "</rdf:Description>"){
-        blocks += temp
-        temp = ""
-        i=0
-      }
-    }
-    if (temp != "" && temp.trim() != "</rdf:RDF>"){
-      blocks += temp
-    }
-    blocks
-  }
-
-  /**
-    * Loads an RDF/XML file into a List
     * @param fileName An RDD of
     * @param prefix a string which represent a prefix
     * @param url a string which represents a url
@@ -237,43 +208,6 @@ object XmlReader {
     var triplesDF =  sparkSession.createDataFrame(rowsRDD)
     triplesDF
   }
-
-  /**
-    * Loads an RDF/XML file into an DataFrame (Jena's solution)
-    *
-    * @param sparkSession spark Session
-    * @param rowTag A row tag
-    * @param path the file path on the file system
-    * @return A listBuffer of blocks in the file
-    */
-
-  def getSparkXMLRDD(sparkSession: SparkSession,  path : String, rowTag : String): RDD[String] ={
-    // get triples for the flatMap
-    def getTriples(row: Row, columns : Array[String]): Array[String] ={
-      var triples  = new ListBuffer[String]()
-      for (i <- 1 to row.size - 1){
-        if(row.get(i) != "null" && row.get(i) != null && i !=0 && columns(i) != null){
-          triples += row.get(0) + " " + columns(i)+ " "  + row.get(i)
-        }
-      }
-      triples.toArray
-    }
-    var time = System.nanoTime()
-    val sqlContext = new org.apache.spark.sql.SQLContext(sparkSession.sparkContext)
-    val df = sqlContext.read
-      .format("com.databricks.spark.xml")
-      .option("rowTag", rowTag)
-      .load(path)
-    val columns = df.columns
-    var temp=""
-        val da=df.rdd
-    var rdd = da.flatMap(row =>
-      getTriples(row, columns)
-        )
-    var timeAfter = System.nanoTime()
-    rdd
-  }
-
 
 }
 
