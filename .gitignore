@@ -1,0 +1,11 @@
+data/*
+*.iml
+spark-warehouse/*
+target/*
+!target/site
+*.properties
+.idea/*
+.idea/
+data/
+spark-warehouse/
+src/test/
