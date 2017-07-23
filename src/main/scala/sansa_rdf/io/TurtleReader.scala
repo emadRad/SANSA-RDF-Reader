@@ -61,7 +61,7 @@ object TurtleReader {
     if(!prefixes.isEmpty()){
       pref = prefixes.reduce((a, b) => a + "\n" + b)
     }
-    val b = readFile(path)
+    val b = readFile(sc,path)
     val blockRDD = sc.parallelize(b, 4)
     blockRDD.flatMap(block => blockParse(block, pref))
   }
@@ -84,11 +84,12 @@ object TurtleReader {
   }
 
 
-  def readFile(fileName: String): ListBuffer[String] = {
+  def readFile(sc : SparkContext, fileName: String): ListBuffer[String] = {
     var temp: String = ""
     var blocks = new ListBuffer[String]()
     var counter = 0
-    for (line <- Source.fromFile(fileName).getLines) {
+    val lines = sc.textFile(fileName).collect()
+    for (line <- lines) {
       temp ++= line
       temp ++= "\n"
       if (line.trim().takeRight(1) == ".") {
@@ -106,6 +107,7 @@ object TurtleReader {
     }
     blocks
   }
+
   def blockParse(block: String, prefixes: String): Array[String] = {
     var triples = ArrayBuffer.empty[String]
     var model = ModelFactory.createDefaultModel();
